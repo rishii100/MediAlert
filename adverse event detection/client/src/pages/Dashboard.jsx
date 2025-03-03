@@ -7,7 +7,6 @@ import PatientDetails from '../components/PatientDetails'
 function Dashboard() {
     return (
         <>
-            Dashboard
             <Header />
             <FileUpload />
             <PatientTable />
