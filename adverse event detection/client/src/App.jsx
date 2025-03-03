@@ -1,11 +1,19 @@
-function App() {
-  return (
-    <>
-      <div className="text-center text-2xl font-bold">
-        Hello Vite + React!
-      </div>
-    </>
-  )
-}
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Signup from "./pages/Signup";
 
-export default App
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />  
+        <Route path="/signup" element={<Signup />} /> 
+        <Route path="/dashboard" element={<Dashboard />} />  {/* Protected dashboard */}
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
