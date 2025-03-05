@@ -59,6 +59,9 @@ With the increasing need for accessible healthcare, patients often struggle to b
 
 ---
 
+### Architecture Diagram
+![Project Architecture](https://github.com/user-attachments/assets/179db5f3-077f-4e0c-a11a-472fd8d9c63c)
+
 
 ## How to Run the Project
 
@@ -137,7 +140,7 @@ With the increasing need for accessible healthcare, patients often struggle to b
 ## Submission Details
 
 ### Hosted Links
-- **Doctor Dashboard:** [Vercel Deployment](https://adverse-event-detection.vercel.app/)
+- **Doctor Dashboard:** [Vercel Deployment](https://adverse-event-detection-host.vercel.app)
 - **Patient Mobile App Figma Design:** [Figma Design](https://www.figma.com/proto/TdOuVyQ9TKeTL9KBBCp7wb/WebDesign?node-id=11-343&t=1t2yUjlGP499ruZ8-1&starting-point-node-id=11%3A343)
 
 ### Test Cases
