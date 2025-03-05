@@ -34,11 +34,6 @@ This project integrates two innovative healthcare solutions into one platform:
 
 By combining these functionalities, our platform improves patient safety through early detection and streamlines access to quality healthcare.
 
-## Problem Statement
-- **Early Medical Intervention:** Many adverse events go undetected until they escalate, causing severe consequences.
-- **Inefficient Appointment Scheduling:** Traditional booking systems often lead to double bookings, delays, and inefficiencies.
-Our solution addresses these challenges with advanced AI-driven analysis and an intuitive appointment system.
-
 ## Features
 - **AI-Powered Analysis:**
   - Converts audio conversations to text using Deepgram.
