@@ -67,7 +67,7 @@ app.post("/api/analyze", async (req, res) => {
                 text: entity.Text.toLowerCase(),
                 category: entity.Category
             }))
-            : []; 
+            : [];
 
         // Fetch adverse event reports from FDA API
         let fdaReports = [];
