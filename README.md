@@ -58,24 +58,18 @@ The system is divided into two main modules:
 ## Setup Instructions
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/yourusername/yourproject.git
+   git clone https://github.com/rishii100/Code-Wizards.git
    cd yourproject
    ```
-2. **Backend Setup:**
+2. **Webpage Setup:**
    - Navigate to the backend folder:
      ```bash
-     cd backend
+     cd adverse-event-detection
      npm install
      npm start
      ```
    - Configure environment variables in a `.env` file (e.g., API keys, MongoDB URI).
-3. **Frontend Setup (Doctor Dashboard):**
-   - Navigate to the frontend folder:
-     ```bash
-     cd ../frontend
-     npm install
-     npm start
-     ```
+
 4. **Mobile App Setup:**
    - Navigate to the Flutter project folder:
      ```bash
