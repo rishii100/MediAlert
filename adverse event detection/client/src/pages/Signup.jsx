@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { updateProfile } from "firebase/auth";
-import { toast } from "react-toastify";
+import Swal from 'sweetalert2';
 
 const Signup = () => {
     const { register, loginWithGoogle } = useContext(AuthContext);
@@ -27,22 +27,44 @@ const Signup = () => {
                 displayName: name,
             });
 
-            toast.success("User Registered Successfully");
+            Swal.fire({
+                icon: 'success',
+                title: 'Registration Successful',
+                text: 'Your account has been created!',
+                showConfirmButton: false,
+                timer: 1500
+            });
             navigate(from, { replace: true });
         } catch (error) {
             setError(error.message);
-            toast.error(error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Registration Failed',
+                text: error.message,
+                confirmButtonText: 'Try Again'
+            });
         }
     };
 
     const handleGoogleRegister = async () => {
         try {
             await loginWithGoogle();
-            toast.success("User Registered Successfully");
+            Swal.fire({
+                icon: 'success',
+                title: 'Registration Successful',
+                text: 'Your account has been created!',
+                showConfirmButton: false,
+                timer: 1500
+            });
             navigate(from, { replace: true });
         } catch (error) {
             setError(error.message);
-            toast.error(error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Registration Failed',
+                text: error.message,
+                confirmButtonText: 'Try Again'
+            });
         }
     };
 

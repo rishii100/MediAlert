@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 
 const Login = () => {
     const { login, loginWithGoogle } = useContext(AuthContext);
@@ -19,25 +19,47 @@ const Login = () => {
 
         try {
             await login(email, password);
-            toast.success('User logged in successfully');
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Successful',
+                text: 'You have been logged in successfully!',
+                showConfirmButton: false,
+                timer: 1500
+            });
             navigate(from, { replace: true });
         } catch (error) {
             const errorMessage = error.message;
             setError(errorMessage);
-            toast.error(errorMessage);
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: errorMessage,
+                confirmButtonText: 'Try Again'
+            });
         }
     };
 
     const handleGoogleRegister = () => {
         loginWithGoogle()
             .then(() => {
-                toast.success('User registered successfully');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login Successful',
+                    text: 'You have been logged in successfully!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
                 navigate(from, { replace: true });
             })
             .catch((error) => {
                 const errorMessage = error.message;
                 setError(errorMessage);
-                toast.error(errorMessage);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Failed',
+                    text: errorMessage,
+                    confirmButtonText: 'Try Again'
+                });
             });
     };
 
