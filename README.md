@@ -8,6 +8,24 @@ Welcome to our project repository for the **Veersa Hackathon 2025**! We are tack
 Our goal is to provide a seamless experience for both **patients** and **doctors** by leveraging modern technologies to solve real-world healthcare challenges.
 
 ---
+## Submission Details
+
+### Hosted Links
+- **Doctor Dashboard:** [Vercel Deployment](https://adverse-event-detection-host.vercel.app)
+- **Patient Mobile App Figma Design:** [Figma Design](https://www.figma.com/proto/TdOuVyQ9TKeTL9KBBCp7wb/WebDesign?node-id=11-343&t=1t2yUjlGP499ruZ8-1&starting-point-node-id=11%3A343)
+- **Video Presentation:** [Youtube Video](https://youtu.be/0UjOlSE_QZE)
+  
+### Test Cases
+- **Adverse Event Detection Test Cases:** `Adverse Event Detection Test Document.md`
+- **Doctor Appointment Test Cases:** `Doctor-Appointment Test Documentation.md`
+
+
+### Team Members
+- **Nikhil Dixit** - Web Application
+- **Anirban Saha** - AI/ML
+- **Dibek Todi** - Mobile Application
+- **Ravish Gupta** - Figma Design
+---
 
 ## Project Overview
 
@@ -63,93 +81,4 @@ With the increasing need for accessible healthcare, patients often struggle to b
 ![Project Architecture](https://github.com/user-attachments/assets/179db5f3-077f-4e0c-a11a-472fd8d9c63c)
 
 
-## How to Run the Project
 
-### Prerequisites
-- Node.js
-- Flutter SDK
-- MongoDB
-- Firebase Account (for Authentication)
-- AWS Comprehend Medical API Key
-- Deepgram API Key
-
-### Steps to Run
-
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/rishii100/Code-Wizards
-   cd Code-Wizards
-   ```
-
-2. **Install Dependencies:**
-
-   **For the Adverse Medical Event Prediction:**
-   ```bash
-   cd adverse-event-detection/client
-   npm install
-   ```
-
-   **For the Scheduling Appointments Mobile App:**
-   ```bash
-   cd Doctor-Appointment/client
-   flutter pub get
-   ```
-
-   **For the Backend:**
-   ```bash
-   cd adverse-event-detection/server
-   npm install
-   cd ../../Doctor-Appointment/server
-   npm install
-   ```
-
-3. **Set Up Environment Variables:**
-   
-   Create a `.env` file in both backend folders and add the required API keys and database credentials.
-
-4. **Run the Servers:**
-   
-   **Start the Adverse Event Detection Backend:**
-   ```bash
-   cd adverse-event-detection/server
-   npm start
-   ```
-   
-   **Start the Scheduling Appointments Backend:**
-   ```bash
-   cd Doctor-Appointment/server
-   npm start
-   ```
-
-5. **Run the Frontend:**
-   
-   **For the Adverse Medical Event Prediction:**
-   ```bash
-   cd adverse-event-detection/client
-   npm start
-   ```
-   
-   **For the Scheduling Appointments Mobile App:**
-   ```bash
-   cd Doctor-Appointment/client
-   flutter run
-   ```
-
----
-
-## Submission Details
-
-### Hosted Links
-- **Doctor Dashboard:** [Vercel Deployment](https://adverse-event-detection-host.vercel.app)
-- **Patient Mobile App Figma Design:** [Figma Design](https://www.figma.com/proto/TdOuVyQ9TKeTL9KBBCp7wb/WebDesign?node-id=11-343&t=1t2yUjlGP499ruZ8-1&starting-point-node-id=11%3A343)
-
-### Test Cases
-- **Adverse Event Detection Test Cases:** `Adverse Event Detection Test Document.md`
-- **Doctor Appointment Test Cases:** `Doctor-Appointment Test Documentation.md`
-
-
-### Team Members
-- **Nikhil Dixit** - Web Application
-- **Anirban Saha** - AI/ML
-- **Dibek Todi** - Mobile Application
-- **Ravish Gupta** - Figma Design
