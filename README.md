@@ -22,23 +22,10 @@ Our goal is to provide a seamless experience for both **patients** and **doctors
 
 ### Team Members
 - **Nikhil Dixit** - Web Application
-- **Anirban Saha** - AI/ML
+- **Aneerban Saha** - AI/ML
 - **Dibek Todi** - Mobile Application
 - **Ravish Gupta** - Figma Design
 ---
-
-## Project Overview
-
-### Use Case 1: Adverse Medical Event Prediction
-**Problem Statement:**  
-Millions of conversations happen daily between medical agents/nurses and patients regarding medical conditions and medications. Often, there are subtle indications of adverse events that go unnoticed. Our solution aims to **predict and flag potential adverse events** from recorded conversations to prevent or remediate them quickly.
-
-**Key Features:**
-- **Conversation Analysis:** Analyze recorded conversations using **Deepgram** for transcription and **AWS Comprehend Medical** for NLP-based risk detection.
-- **AI/ML Processing Layer:** Integrate machine learning models to predict adverse events based on FDA's adverse event repository data.
-- **User-Friendly Dashboard:** A **React.js** and **TailwindCSS** based web dashboard for doctors to upload audio, view predictions, and generate reports.
-
-# AI-Powered Adverse Event Detection & Doctor Appointment Booking System
 
 ## Overview
 This project integrates two innovative healthcare solutions into one platform:
@@ -74,7 +61,7 @@ Our solution addresses these challenges with advanced AI-driven analysis and an 
 
 ### Doctor Dashboard
 - **Frontend:** Built with React.js and TailwindCSS, deployed on Vercel for a responsive web interface.
-- **Backend:** A Node.js and Express server handles API requests, user authentication (JWT), and integration with AI services.
+- **Backend:** A Node.js and Express server handles API requests, user authentication and integration with AI services.
 - **AI Processing:** 
   - **Deepgram API** converts patient call audio to text.
   - **AWS Comprehend Medical** analyzes the text to extract medical insights and detect adverse events.
@@ -93,14 +80,21 @@ Our solution addresses these challenges with advanced AI-driven analysis and an 
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB 
 - **AI/NLP:** AWS Comprehend Medical, Deepgram
-- **Authentication:** JWT, Firebase Authentication
+- **Authentication:** Firebase Authentication
 - **Notifications:** Firebase Cloud Messaging, Nodemailer
 - **Deployment:** Vercel (Web), Render (Backend)
 
----
+## Deployment
+- **Frontend:** Deploy on Vercel.
+- **Backend:** Deploy on Render or Heroku.
+- **Mobile App:** Build APKs/iOS builds using Flutter’s build tools.
+
 
 ### License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+
+
 
 
 
