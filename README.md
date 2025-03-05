@@ -66,7 +66,7 @@ By combining these functionalities, our platform improves patient safety through
 ### Appointment Booking Module
 - **Mobile App:** Developed in Flutter for cross-platform compatibility, allowing patients to search for doctors, book appointments, and view schedules.
 - **Backend Integration:** The same Node.js server handles appointment scheduling, preventing double bookings and managing real-time data.
-- **Notifications:** Real-time notifications are sent via Firebase Cloud Messaging, and email confirmations/reminders are managed by Nodemailer or SendGrid.
+- **Notifications:** Real-time notifications are sent via Firebase Cloud Messaging, and email confirmations/reminders are managed by Nodemailer.
 - **Geo-Location:** Utilizes geo-location APIs to assist patients in finding nearby doctors.
 
 ## Tech Stack
