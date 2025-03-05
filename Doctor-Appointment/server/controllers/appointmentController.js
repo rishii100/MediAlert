@@ -1,6 +1,7 @@
 const Appointment = require("../models/Appointment");
 const Doctor = require("../models/Doctor");
 const User = require("../models/User");
+const nodemailer = require("nodemailer");
 
 exports.bookAppointment = async (req, res) => {
   try {
@@ -70,8 +71,8 @@ exports.bookAppointment = async (req, res) => {
     await appointment.save();
 
     // Populate doctor and patient information
-    await appointment.populate("doctorId", "name");
-    await appointment.populate("patientId", "firstName lastName");
+    await appointment.populate("doctorId", "name specialty address");
+    await appointment.populate("patientId", "firstName lastName email");
 
     // Format the response
     const response = {
@@ -86,6 +87,69 @@ exports.bookAppointment = async (req, res) => {
       status: appointment.status,
       createdAt: appointment.createdAt,
     };
+
+    // Send confirmation email
+    try {
+      if (appointment.patientId.email) {
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PASSWORD,
+          },
+        });
+
+        // Format the appointment date
+        const appointmentDateFormatted = new Date(
+          appointmentDate
+        ).toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+
+        const mailOptions = {
+          from: process.env.GMAIL_USER,
+          to: appointment.patientId.email,
+          subject: "MediAlert - Appointment Confirmation",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+              <h2 style="color: #8873f4; text-align: center;">MediAlert</h2>
+              <p>Hello ${appointment.patientId.firstName} ${
+            appointment.patientId.lastName
+          },</p>
+              <p>Your appointment has been successfully booked!</p>
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p><strong>Doctor:</strong> ${appointment.doctorId.name}</p>
+                <p><strong>Specialty:</strong> ${
+                  appointment.doctorId.specialty
+                }</p>
+                <p><strong>Date:</strong> ${appointmentDateFormatted}</p>
+                <p><strong>Time:</strong> ${appointment.startTime} - ${
+            appointment.endTime
+          }</p>
+                <p><strong>Address:</strong> ${appointment.doctorId.address}</p>
+              </div>
+              <p><strong>Directions:</strong> <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                appointment.doctorId.address
+              )}">Get directions on Google Maps</a></p>
+              <p>Please arrive 10 minutes before your scheduled appointment time.</p>
+              <p>If you need to reschedule or cancel, please do so at least 24 hours in advance.</p>
+              <p>Best regards,<br>The MediAlert Team</p>
+            </div>
+          `,
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(
+          `Appointment confirmation sent to ${appointment.patientId.email}`
+        );
+      }
+    } catch (emailError) {
+      console.error("Email error:", emailError);
+      // Continue execution even if email fails
+    }
 
     res.status(201).json({
       message: "Appointment booked successfully",

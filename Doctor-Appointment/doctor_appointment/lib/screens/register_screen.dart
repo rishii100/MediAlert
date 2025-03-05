@@ -144,28 +144,23 @@ class _RegisterScreenState extends State<RegisterScreen>
       if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Registration successful'),
+            content: Text('Registration successful! Please login to continue.'),
             backgroundColor: Colors.green,
           ),
         );
 
-        // If there's a callback for registration success, call it
-        if (widget.onRegisterSuccess != null) {
-          widget.onRegisterSuccess!();
-        } else {
-          // Navigate to login page after successful registration
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LoginScreen(
-                onLoginSuccess: () {
-                  Navigator.of(context)
-                      .pushNamedAndRemoveUntil('/HomePage', (route) => false);
-                },
-              ),
+        // Navigate to login page after successful registration
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoginScreen(
+              onLoginSuccess: () {
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/HomePage', (route) => false);
+              },
             ),
-          );
-        }
+          ),
+        );
       } else {
         setState(() {
           _errorMessage = result['message'];
@@ -217,14 +212,14 @@ class _RegisterScreenState extends State<RegisterScreen>
                 ),
                 SizedBox(height: 30),
                 Text(
-                  'Create Account',
+                  'Create MediAlert Account',
                   style: TextStyles.h1Style,
                   textAlign: TextAlign.center,
                 ).alignCenter,
                 SizedBox(height: 10),
                 Text(
                   _otpSent
-                      ? 'Enter the OTP sent to your phone'
+                      ? 'Enter the OTP sent to your email'
                       : 'Register to book doctor appointments',
                   style: TextStyles.body.subTitleColor,
                   textAlign: TextAlign.center,
@@ -309,7 +304,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'OTP',
-                        hintText: 'Enter the OTP sent to your phone',
+                        hintText: 'Enter the OTP sent to your email',
                         prefixIcon: Icon(Icons.lock, color: LightColor.purple),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -379,7 +374,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ),
+                        );
                       },
                       child: Text(
                         'Login',

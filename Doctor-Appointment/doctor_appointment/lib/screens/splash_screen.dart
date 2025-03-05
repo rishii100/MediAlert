@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: 20),
             Text(
-              'Doctor Appointment',
+              'MediAlert',
               style: TextStyles.h1Style.white,
             ),
             SizedBox(height: 10),

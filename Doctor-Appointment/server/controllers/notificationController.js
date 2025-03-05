@@ -1,12 +1,15 @@
 const Appointment = require("../models/Appointment");
 const User = require("../models/User");
-const twilio = require("twilio");
+const nodemailer = require("nodemailer");
 
-// Initialize Twilio client
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+// Initialize email transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASSWORD,
+  },
+});
 
 exports.sendAppointmentReminder = async (req, res) => {
   try {
@@ -18,7 +21,7 @@ exports.sendAppointmentReminder = async (req, res) => {
 
     const appointment = await Appointment.findById(appointmentId)
       .populate("doctorId", "name")
-      .populate("patientId", "firstName lastName phone");
+      .populate("patientId", "firstName lastName email");
 
     if (!appointment || !appointment.patientId) {
       return res.status(404).json({ message: "Appointment not found" });
@@ -29,19 +32,35 @@ exports.sendAppointmentReminder = async (req, res) => {
       appointment.appointmentDate
     ).toLocaleDateString();
 
-    // Send SMS reminder if phone number is available
-    if (appointment.patientId.phone) {
+    // Send email reminder if email is available
+    if (appointment.patientId.email) {
       try {
-        await client.messages.create({
-          body: `Reminder: Your appointment with ${appointment.doctorId.name} is scheduled for ${appointmentDate} at ${appointment.startTime}.`,
-          from: process.env.TWILIO_PHONE_NUMBER,
-          to: appointment.patientId.phone,
-        });
+        const mailOptions = {
+          from: process.env.GMAIL_USER,
+          to: appointment.patientId.email,
+          subject: "MediAlert - Appointment Reminder",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+              <h2 style="color: #8873f4; text-align: center;">MediAlert</h2>
+              <p>Hello ${appointment.patientId.firstName} ${appointment.patientId.lastName},</p>
+              <p>This is a reminder for your upcoming appointment:</p>
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p><strong>Doctor:</strong> ${appointment.doctorId.name}</p>
+                <p><strong>Date:</strong> ${appointmentDate}</p>
+                <p><strong>Time:</strong> ${appointment.startTime}</p>
+              </div>
+              <p>Please arrive 10 minutes before your scheduled appointment time.</p>
+              <p>If you need to reschedule or cancel, please do so at least 24 hours in advance.</p>
+              <p>Best regards,<br>The MediAlert Team</p>
+            </div>
+          `,
+        };
 
-        console.log(`Reminder sent to ${appointment.patientId.phone}`);
-      } catch (twilioError) {
-        console.error("Twilio error:", twilioError);
-        // Continue execution even if Twilio fails
+        await transporter.sendMail(mailOptions);
+        console.log(`Reminder sent to ${appointment.patientId.email}`);
+      } catch (emailError) {
+        console.error("Email error:", emailError);
+        // Continue execution even if email fails
       }
     }
 
@@ -68,25 +87,44 @@ exports.checkUpcomingAppointments = async () => {
       status: "scheduled",
     })
       .populate("doctorId", "name")
-      .populate("patientId", "firstName lastName phone deviceToken");
+      .populate("patientId", "firstName lastName email deviceToken");
 
     console.log(`Found ${upcomingAppointments.length} upcoming appointments`);
 
     // Send reminders for each appointment
     for (const appointment of upcomingAppointments) {
-      if (appointment.patientId && appointment.patientId.phone) {
+      if (appointment.patientId && appointment.patientId.email) {
         try {
-          await client.messages.create({
-            body: `Reminder: Your appointment with ${appointment.doctorId.name} is in 1 hour.`,
-            from: process.env.TWILIO_PHONE_NUMBER,
-            to: appointment.patientId.phone,
-          });
+          const appointmentDate = new Date(
+            appointment.appointmentDate
+          ).toLocaleDateString();
 
+          const mailOptions = {
+            from: process.env.GMAIL_USER,
+            to: appointment.patientId.email,
+            subject: "MediAlert - Upcoming Appointment Reminder",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                <h2 style="color: #8873f4; text-align: center;">MediAlert</h2>
+                <p>Hello ${appointment.patientId.firstName} ${appointment.patientId.lastName},</p>
+                <p>Your appointment with ${appointment.doctorId.name} is in 1 hour.</p>
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                  <p><strong>Doctor:</strong> ${appointment.doctorId.name}</p>
+                  <p><strong>Date:</strong> ${appointmentDate}</p>
+                  <p><strong>Time:</strong> ${appointment.startTime}</p>
+                </div>
+                <p>Please arrive 10 minutes before your scheduled appointment time.</p>
+                <p>Best regards,<br>The MediAlert Team</p>
+              </div>
+            `,
+          };
+
+          await transporter.sendMail(mailOptions);
           console.log(
-            `Automatic reminder sent to ${appointment.patientId.phone}`
+            `Automatic reminder sent to ${appointment.patientId.email}`
           );
-        } catch (twilioError) {
-          console.error("Twilio error:", twilioError);
+        } catch (emailError) {
+          console.error("Email error:", emailError);
         }
       }
     }

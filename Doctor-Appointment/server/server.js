@@ -24,9 +24,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Doctor Appointment API",
+      title: "MediAlert API",
       version: "1.0.0",
-      description: "API documentation for the doctor appointment system",
+      description: "API documentation for the MediAlert appointment system",
     },
     servers: [{ url: `http://localhost:${PORT}` }],
     components: {
@@ -47,7 +47,7 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Default Route
 app.get("/", (req, res) => {
-  res.send("Doctor Appointment API is running!");
+  res.send("MediAlert API is running!");
 });
 
 // Health check route

@@ -123,7 +123,7 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
               ),
               SizedBox(height: 20),
               Text(
-                'Welcome to Doctor Appointment',
+                'Welcome to MediAlert',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,

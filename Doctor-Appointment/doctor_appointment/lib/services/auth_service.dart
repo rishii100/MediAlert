@@ -79,18 +79,28 @@ class AuthService {
     }
   }
 
-  // Send OTP to user's phone
-  static Future<Map<String, dynamic>> sendOTP(String phone) async {
+  // Send OTP to user's phone or email
+  static Future<Map<String, dynamic>> sendOTP(String? phone,
+      [String? email]) async {
     try {
-      // Validate phone number
-      if (phone.isEmpty) {
+      // Validate input
+      if ((phone == null || phone.isEmpty) &&
+          (email == null || email.isEmpty)) {
         return {
           'success': false,
-          'message': 'Please enter a valid phone number',
+          'message': 'Please enter your phone number or email',
         };
       }
 
-      print('Sending OTP to phone: $phone');
+      print('Sending OTP to: ${phone ?? email}');
+
+      final Map<String, dynamic> requestBody = {};
+      if (phone != null && phone.isNotEmpty) {
+        requestBody['phone'] = phone;
+      }
+      if (email != null && email.isNotEmpty) {
+        requestBody['email'] = email;
+      }
 
       final response = await http
           .post(
@@ -99,9 +109,7 @@ class AuthService {
               'Content-Type': 'application/json',
               'Connection': 'keep-alive',
             },
-            body: json.encode({
-              'phone': phone,
-            }),
+            body: json.encode(requestBody),
           )
           .timeout(Duration(seconds: 10));
 
@@ -129,18 +137,37 @@ class AuthService {
   }
 
   // Verify OTP and login
-  static Future<Map<String, dynamic>> verifyOTP(
-      String phone, String otp) async {
+  static Future<Map<String, dynamic>> verifyOTP(String? phone, String otp,
+      [String? email]) async {
     try {
       // Validate inputs
-      if (phone.isEmpty || otp.isEmpty) {
+      if (otp.isEmpty) {
         return {
           'success': false,
-          'message': 'Phone number and OTP are required',
+          'message': 'OTP is required',
         };
       }
 
-      print('Verifying OTP: $otp for phone: $phone');
+      if ((phone == null || phone.isEmpty) &&
+          (email == null || email.isEmpty)) {
+        return {
+          'success': false,
+          'message': 'Phone number or email is required',
+        };
+      }
+
+      print('Verifying OTP: $otp for: ${phone ?? email}');
+
+      final Map<String, dynamic> requestBody = {
+        'otp': otp,
+      };
+
+      if (phone != null && phone.isNotEmpty) {
+        requestBody['phone'] = phone;
+      }
+      if (email != null && email.isNotEmpty) {
+        requestBody['email'] = email;
+      }
 
       final response = await http
           .post(
@@ -149,10 +176,7 @@ class AuthService {
               'Content-Type': 'application/json',
               'Connection': 'keep-alive',
             },
-            body: json.encode({
-              'phone': phone,
-              'otp': otp,
-            }),
+            body: json.encode(requestBody),
           )
           .timeout(Duration(seconds: 10));
 

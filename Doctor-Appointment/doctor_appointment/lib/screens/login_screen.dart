@@ -17,12 +17,14 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
   final _otpController = TextEditingController();
   bool _isLoading = false;
   bool _otpSent = false;
   String _errorMessage = '';
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  bool _useEmail = true; // Default to email login
 
   @override
   void initState() {
@@ -43,13 +45,20 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void dispose() {
     _phoneController.dispose();
+    _emailController.dispose();
     _otpController.dispose();
     _animationController.dispose();
     super.dispose();
   }
 
   Future<void> _sendOTP() async {
-    if (_phoneController.text.isEmpty) {
+    // Validate input
+    if (_useEmail && _emailController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your email';
+      });
+      return;
+    } else if (!_useEmail && _phoneController.text.isEmpty) {
       setState(() {
         _errorMessage = 'Please enter your phone number';
       });
@@ -62,7 +71,10 @@ class _LoginScreenState extends State<LoginScreen>
     });
 
     try {
-      final result = await AuthService.sendOTP(_phoneController.text);
+      final result = await AuthService.sendOTP(
+        _useEmail ? null : _phoneController.text,
+        _useEmail ? _emailController.text : null,
+      );
 
       setState(() {
         _isLoading = false;
@@ -101,8 +113,9 @@ class _LoginScreenState extends State<LoginScreen>
 
     try {
       final result = await AuthService.verifyOTP(
-        _phoneController.text,
+        _useEmail ? null : _phoneController.text,
         _otpController.text,
+        _useEmail ? _emailController.text : null,
       );
 
       setState(() {
@@ -176,37 +189,86 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
                 SizedBox(height: 30),
                 Text(
-                  'Welcome Back',
+                  'Welcome to MediAlert',
                   style: TextStyles.h1Style,
                   textAlign: TextAlign.center,
                 ).alignCenter,
                 SizedBox(height: 10),
                 Text(
                   _otpSent
-                      ? 'Enter the OTP sent to your phone'
-                      : 'Login with your phone number using OTP verification',
+                      ? 'Enter the OTP sent to your email'
+                      : 'Login with your email using OTP verification',
                   style: TextStyles.body.subTitleColor,
                   textAlign: TextAlign.center,
                 ).alignCenter,
                 SizedBox(height: 40),
-                TextField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: 'Phone Number',
-                    hintText: 'Enter your phone number',
-                    prefixIcon: Icon(Icons.phone, color: LightColor.purple),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabled: !_otpSent,
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide:
-                          BorderSide(color: LightColor.purple, width: 2),
-                    ),
+                if (!_otpSent) ...[
+                  // Toggle between email and phone login
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ChoiceChip(
+                        label: Text('Email'),
+                        selected: _useEmail,
+                        onSelected: (selected) {
+                          setState(() {
+                            _useEmail = selected;
+                          });
+                        },
+                      ),
+                      SizedBox(width: 20),
+                      ChoiceChip(
+                        label: Text('Phone'),
+                        selected: !_useEmail,
+                        onSelected: (selected) {
+                          setState(() {
+                            _useEmail = !selected;
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                ),
+                  SizedBox(height: 20),
+
+                  // Show either email or phone input based on selection
+                  if (_useEmail)
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        hintText: 'Enter your email address',
+                        prefixIcon: Icon(Icons.email, color: LightColor.purple),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: LightColor.purple, width: 2),
+                        ),
+                      ),
+                    )
+                  else
+                    TextField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: 'Phone Number',
+                        hintText: 'Enter your phone number',
+                        prefixIcon: Icon(Icons.phone, color: LightColor.purple),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        enabled: !_otpSent,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: LightColor.purple, width: 2),
+                        ),
+                      ),
+                    ),
+                ],
                 SizedBox(height: 20),
                 if (_otpSent)
                   AnimatedContainer(
@@ -217,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen>
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'OTP',
-                        hintText: 'Enter the OTP sent to your phone',
+                        hintText: 'Enter the OTP sent to your email',
                         prefixIcon: Icon(Icons.lock, color: LightColor.purple),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
