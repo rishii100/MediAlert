@@ -73,7 +73,7 @@ The system is divided into two main modules:
 4. **Mobile App Setup:**
    - Navigate to the Flutter project folder:
      ```bash
-     cd ../mobile_app
+     cd Doctor-Appointment
      flutter pub get
      flutter run
      ```
