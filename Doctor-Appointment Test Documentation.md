@@ -31,14 +31,9 @@
 
 ## 4. Automated API Test Cases
 
-These tests use Jest and Supertest for API validation.
-
 ### 4.1 Authentication API Tests
 
 ```javascript
-const request = require('supertest');
-const app = require('../server');
-
 describe('Authentication API Tests', () => {
   test('Register a new user', async () => {
     const response = await request(app)
@@ -47,10 +42,44 @@ describe('Authentication API Tests', () => {
     expect(response.status).toBe(201);
     expect(response.body.message).toBe('OTP sent successfully to your email');
   });
+
+  test('Send OTP for login', async () => {
+    const response = await request(app)
+      .post('/api/auth/send-otp')
+      .send({ phone: '9876543210' });
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('OTP sent successfully to your email');
+  });
+
+  test('Verify OTP and Login', async () => {
+    const response = await request(app)
+      .post('/api/auth/verify-otp')
+      .send({ phone: '9876543210', otp: '123456' });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('token');
+  });
 });
 ```
 
-### 4.2 Appointment API Tests
+### 4.2 Doctor API Tests
+
+```javascript
+describe('Doctor API Tests', () => {
+  test('Fetch all doctors', async () => {
+    const response = await request(app).get('/api/doctors');
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+  });
+
+  test('Fetch doctor by ID', async () => {
+    const response = await request(app).get('/api/doctors/65fa1234abcd5678ef901234');
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('name');
+  });
+});
+```
+
+### 4.3 Appointment API Tests
 
 ```javascript
 describe('Appointment API Tests', () => {
@@ -62,6 +91,28 @@ describe('Appointment API Tests', () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('appointment');
   });
+
+  test('Cancel an appointment', async () => {
+    const response = await request(app)
+      .delete('/api/appointments/65fa1234abcd5678ef901234')
+      .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Appointment cancelled successfully');
+  });
+});
+```
+
+### 4.4 Notification API Tests
+
+```javascript
+describe('Notification API Tests', () => {
+  test('Send appointment reminder', async () => {
+    const response = await request(app)
+      .post('/api/notifications/send-reminder')
+      .send({ appointmentId: '65fa1234abcd5678ef901234' });
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Reminder sent successfully');
+  });
 });
 ```
 
@@ -70,4 +121,3 @@ describe('Appointment API Tests', () => {
 - **Backend Server:** Node.js with Express
 - **Database:** MongoDB
 - **Email Service:** Nodemailer (Gmail SMTP)
-
