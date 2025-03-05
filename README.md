@@ -80,5 +80,8 @@ With the increasing need for accessible healthcare, patients often struggle to b
 ### Architecture Diagram
 ![Project Architecture](https://github.com/user-attachments/assets/179db5f3-077f-4e0c-a11a-472fd8d9c63c)
 
+### License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
 
 
