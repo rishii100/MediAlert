@@ -1,7 +1,7 @@
-import { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
     FaUser, FaStethoscope, FaPills, FaClipboardList,
-    FaExclamationTriangle, FaHeartbeat, FaInfoCircle, FaNotesMedical, FaSpinner
+    FaExclamationTriangle, FaHeartbeat, FaInfoCircle, FaNotesMedical, FaSpinner, FaDownload, FaExternalLinkAlt
 } from "react-icons/fa";
 import Swal from 'sweetalert2';
 import axios from "axios";
@@ -9,7 +9,20 @@ import axios from "axios";
 const HIGH_RISK_CONDITIONS = [
     "breathing difficulty", "chest pain", "unconsciousness",
     "severe allergic reaction", "high fever", "low oxygen levels",
-    "severe headache", "severe dehydration"
+    "severe headache", "severe dehydration",
+    "cancer", "malignant", "tumor", "metastasis", "sepsis", "stroke", "heart attack", "pulmonary embolism",
+    "abnormal growth", "malignant growth", "cancerous", "growth in lungs", "it is malignant", "hasn't spread extensively",
+    "diabetes", "high sugar levels", "kidney problems", "nerve damage", "heart disease",
+    "chronic kidney disease", "chronic liver disease", "copd", "asthma",
+    "bronchiectasis", "bronchopulmonary dysplasia", "interstitial lung disease",
+    "pulmonary hypertension", "cystic fibrosis", "dementia",
+    "down syndrome", "immunocompromised", "hiv", "obesity",
+    "pregnancy", "sickle cell disease", "thalassemia", "organ transplant",
+    "cerebrovascular disease", "substance use disorder", "tuberculosis",
+    "mental health conditions", "schizophrenia", "bipolar disorder",
+    "severe depression", "parkinsons disease", "cerebral palsy",
+    "multiple sclerosis", "motor neurone disease", "spinal muscular atrophy",
+    "alpha-1 antitrypsin deficiency", "pulmonary fibrosis"
 ];
 
 const AnalyzeTranscript = ({ transcription }) => {
@@ -23,27 +36,30 @@ const AnalyzeTranscript = ({ transcription }) => {
     const [analysisError, setAnalysisError] = useState(null);
     const [analysisComplete, setAnalysisComplete] = useState(false);
 
-    const showToast = (message, type = 'success') => {
-        const Toast = Swal.mixin({
+    const transcriptionRef = useRef(transcription);
+
+    useEffect(() => {
+        transcriptionRef.current = transcription;
+    }, [transcription]);
+
+    const showToast = useCallback((message, type = 'success') => {
+        Swal.fire({
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
             timer: 2000,
             timerProgressBar: true,
+            icon: type,
+            title: message,
             didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
             }
         });
+    }, []);
 
-        Toast.fire({
-            icon: type,
-            title: message
-        });
-    };
-
-    const handleAnalyze = async () => {
-        if (!transcription?.trim()) {
+    const handleAnalyze = useCallback(async () => {
+        if (!transcriptionRef.current?.trim()) {
             showToast("No transcription available for analysis!", 'error');
             return;
         }
@@ -64,26 +80,28 @@ const AnalyzeTranscript = ({ transcription }) => {
         try {
             const response = await axios.post("http://localhost:5000/api/analyze", {
                 patientName,
-                transcription
+                transcription: transcriptionRef.current
             });
 
             if (!response.data) {
                 throw new Error("No response from the server.");
             }
 
-            const extractedEntities = response.data?.extractedEntities || [];
-            const detectedHighRisk = extractedEntities
-                .filter(entity => HIGH_RISK_CONDITIONS.includes(entity.text.toLowerCase()))
-                .map(entity => entity.text);
+            const uniqueEntities = Array.from(new Set(response.data?.extractedEntities?.map(e => JSON.stringify(e))))
+                .map(e => JSON.parse(e));
 
-            setMedicalEntities(extractedEntities);
+            const detectedHighRisk = [...new Set(uniqueEntities
+                .filter(entity => HIGH_RISK_CONDITIONS.includes(entity.text.toLowerCase()))
+                .map(entity => entity.text))];
+
+            setMedicalEntities(uniqueEntities);
             setRiskLevel(response.data.riskLevel || "Unknown");
             setRiskScore(response.data.riskScore || 0);
             setFdaMatches(response.data.fdaMatches || []);
             setCriticalSymptoms(detectedHighRisk);
             setAnalysisComplete(true);
 
-            if (extractedEntities.length === 0) {
+            if (uniqueEntities.length === 0) {
                 showToast("No medical entities detected.", 'warning');
             } else {
                 showToast(`Analysis complete for ${patientName}!`);
@@ -95,70 +113,73 @@ const AnalyzeTranscript = ({ transcription }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [patientName, showToast]);
 
-    // Categorize entities
-    const categorizedEntities = {
-        "MEDICAL_CONDITION": [],
-        "MEDICATION": [],
-        "TEST_TREATMENT_PROCEDURE": [],
-        "ANATOMY": []
-    };
+    const categorizedEntities = useMemo(() => {
+        const categories = {
+            "MEDICAL_CONDITION": [],
+            "MEDICATION": [],
+            "TEST_TREATMENT_PROCEDURE": [],
+            "ANATOMY": []
+        };
 
-    medicalEntities.forEach(entity => {
-        if (categorizedEntities[entity.category]) {
-            categorizedEntities[entity.category].push(entity);
-        }
-    });
+        medicalEntities.forEach(entity => {
+            if (categories[entity.category]) {
+                categories[entity.category].push(entity);
+            }
+        });
 
-    const handleDownloadReport = () => {
+        return categories;
+    }, [medicalEntities]);
+
+    const handleDownloadReport = useCallback(() => {
         if (!analysisComplete) {
             showToast("No analysis to download.", 'warning');
             return;
         }
 
         const reportContent = `
-    ====================================
-        ADVERSE EVENT ANALYSIS REPORT
-    ====================================
-    
-    Patient Name: ${patientName}
-    Date & Time: ${new Date().toLocaleString()}
-    
-    ------------------------------------
-    🩺 RISK ASSESSMENT
-    ------------------------------------
-    - Risk Level: ${riskLevel}
-    - Risk Score: ${riskScore}%
-    
-    ------------------------------------
-    🚨 CRITICAL SYMPTOMS DETECTED
-    ------------------------------------
-    ${criticalSymptoms.length > 0 ? criticalSymptoms.map((symptom, i) => `  ${i + 1}. ${symptom}`).join("\n") : "  None"}
-    
-    ------------------------------------
-    ⚠️ HIGH-RISK CONDITIONS
-    ------------------------------------
-    ${fdaMatches.length > 0 ? fdaMatches.map((match, i) => `  ${i + 1}. ${match.symptom} (${match.category})`).join("\n") : "  None"}
-    
-    ------------------------------------
-    📌 MEDICAL ENTITIES IDENTIFIED
-    ------------------------------------
-    ${medicalEntities.length > 0 ?
+            ====================================
+                ADVERSE EVENT ANALYSIS REPORT
+            ====================================
+
+            Patient Name: ${patientName}
+            Date & Time: ${new Date().toLocaleString()}
+
+            ------------------------------------
+            🩺 RISK ASSESSMENT
+            ------------------------------------
+            - Risk Level: ${riskLevel}
+            - Risk Score: ${riskScore}%
+
+            ------------------------------------
+            🚨 CRITICAL SYMPTOMS DETECTED
+            ------------------------------------
+            ${criticalSymptoms.length > 0 ? criticalSymptoms.map((symptom, i) => `  ${i + 1}. ${symptom}`).join("\n") : "  None"}
+
+            ------------------------------------
+            ⚠️ POTENTIAL ADVERSE EVENTS (FDA MATCHES)
+            ------------------------------------
+            ${fdaMatches.length > 0 ? fdaMatches.map((match, i) => `  ${i + 1}. ${match.symptom} (${match.category}) - Drug: ${match.drug} - Severity: ${match.serious === '1' ? "Serious" : "Non-Serious"} - Reaction: ${match.reaction}`).join("\n") : "  None"}
+
+            ------------------------------------
+            📌 MEDICAL ENTITIES IDENTIFIED
+            ------------------------------------
+            ${medicalEntities.length > 0 ?
                 medicalEntities.map((entity, i) => `  ${i + 1}. ${entity.text} - [${entity.category}]`).join("\n")
                 : "  None"}
-    
-    ====================================
-    END OF REPORT
-    ====================================
-    `;
+
+            ====================================
+            END OF REPORT
+            ====================================
+        `;
 
         const blob = new Blob([reportContent], { type: "text/plain" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = `${patientName}_Analysis_Report.txt`;
         link.click();
-    };
+    }, [analysisComplete, criticalSymptoms, fdaMatches, medicalEntities, patientName, riskLevel, riskScore, showToast]);
 
     return (
         <div className="bg-white mt-4 shadow-2xl rounded-2xl border border-gray-200 p-4 sm:p-6 w-full max-w-4xl mx-auto">
@@ -193,6 +214,13 @@ const AnalyzeTranscript = ({ transcription }) => {
                 ) : "Analyze Transcript"}
             </button>
 
+            {analysisError && (
+                <div className="mt-4 p-4 bg-red-200 text-red-700 border border-red-500 rounded-md">
+                    <FaExclamationTriangle className="inline-block mr-2" />
+                    Error: {analysisError}
+                </div>
+            )}
+
             {/* Risk Level & Score Analysis */}
             {riskLevel && (
                 <div className={`mt-4 sm:mt-6 p-4 sm:p-6 border rounded-xl shadow-md ${riskLevel === "High" ? "bg-red-100 border-red-500 text-red-800" :
@@ -219,7 +247,7 @@ const AnalyzeTranscript = ({ transcription }) => {
             {criticalSymptoms.length > 0 && (
                 <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-red-100 border border-red-500 text-red-800 shadow-md rounded-xl">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <FaExclamationTriangle className="text-red-600" /> ⚠️ Critical Symptoms Detected:
+                        <FaExclamationTriangle className="text-red-600" />Critical Symptoms Detected:
                     </h3>
                     <ul className="list-disc list-inside text-sm mt-2">
                         {criticalSymptoms.map((symptom, index) => (
@@ -232,16 +260,37 @@ const AnalyzeTranscript = ({ transcription }) => {
 
             {/* High-Risk Conditions Alert */}
             {fdaMatches.length > 0 && (
-                <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-red-100 border border-red-500 text-red-800 shadow-md rounded-xl">
+                <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-yellow-100 border border-yellow-500 text-yellow-800 shadow-md rounded-xl">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <FaExclamationTriangle className="text-red-600" /> ⚠️ High-Risk Conditions Detected:
+                        <FaExclamationTriangle className="text-yellow-600" />Potential Adverse Events (FDA Matches):
                     </h3>
-                    <ul className="list-disc list-inside text-sm mt-2">
+                    <div className="mt-2">
                         {fdaMatches.map((match, index) => (
-                            <li key={index} className="pl-2">{match.symptom} ({match.category})</li>
+                            <div key={index} className="mb-4 last:mb-0 p-3 bg-yellow-50 rounded-md border border-yellow-200">
+                                <p className="text-sm font-semibold">
+                                    {index + 1}. {match.symptom} ({match.category})
+                                </p>
+                                <p className="text-sm">
+                                    <span className="font-medium">Drug:</span> {match.drug}
+                                </p>
+                                <p className="text-sm">
+                                    <span className="font-medium">Severity:</span> {match.serious === '1' ? "Serious" : "Non-Serious"}
+                                </p>
+                                <p className="text-sm">
+                                    <span className="font-medium">Reaction:</span> {match.reaction}
+                                </p>
+                                <a
+                                    href={`https://www.google.com/search?q=${match.drug}+${match.reaction}+adverse+effects`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1"
+                                >
+                                    <FaExternalLinkAlt className="mr-1" /> Learn More
+                                </a>
+                            </div>
                         ))}
-                    </ul>
-                    <p className="text-xs mt-2">⚠️ Immediate medical attention may be required.</p>
+                    </div>
+                    <p className="text-xs mt-2">This information is for informational purposes only and does not constitute medical advice.</p>
                 </div>
             )}
 
@@ -250,7 +299,7 @@ const AnalyzeTranscript = ({ transcription }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 sm:mt-6">
                     {Object.keys(categorizedEntities).map((category) => (
                         categorizedEntities[category].length > 0 && (
-                            <div key={category} className="p-4 sm:p-6 bg-white shadow-lg rounded-xl text-gray-800 border border-gray-300 hover:shadow-xl transition-shadow duration-300">
+                            <div key={category} className="p-4 sm:p-6 bg-gray-200 shadow-lg rounded-xl text-gray-800 border border-gray-300 hover:shadow-xl transition-shadow duration-300">
                                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-x-2">
                                     {category === "MEDICAL_CONDITION" && <FaClipboardList className="text-red-500" />}
                                     {category === "MEDICATION" && <FaPills className="text-blue-500" />}
@@ -281,10 +330,10 @@ const AnalyzeTranscript = ({ transcription }) => {
 
             {analysisComplete && (
                 <button
-                    className="mt-4 sm:mt-6 w-full py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 transition-all duration-300"
+                    className="mt-4 sm:mt-6 w-full py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 transition-all duration-300 flex items-center justify-center gap-2"
                     onClick={handleDownloadReport}
                 >
-                    Download Report
+                    <FaDownload /> Download Report
                 </button>
             )}
         </div>

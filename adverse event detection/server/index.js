@@ -6,6 +6,7 @@ import fs from "fs";
 import axios from "axios";
 import { createClient } from "@deepgram/sdk";
 import { ComprehendMedicalClient, DetectEntitiesV2Command } from "@aws-sdk/client-comprehendmedical";
+import Fuse from 'fuse.js'
 
 dotenv.config();
 const app = express();
@@ -22,7 +23,20 @@ const comprehendMedicalClient = new ComprehendMedicalClient({ region: "us-east-1
 const HIGH_RISK_CONDITIONS = [
     "breathing difficulty", "chest pain", "unconsciousness",
     "severe allergic reaction", "high fever", "low oxygen levels",
-    "severe headache", "severe dehydration"
+    "severe headache", "severe dehydration",
+    "cancer", "malignant", "tumor", "metastasis", "sepsis", "stroke", "heart attack", "pulmonary embolism",
+    "abnormal growth", "malignant growth", "cancerous", "growth in lungs", "it is malignant", "hasn't spread extensively",
+    "diabetes", "high sugar levels", "kidney problems", "nerve damage", "heart disease",
+    "chronic kidney disease", "chronic liver disease", "copd", "asthma",
+    "bronchiectasis", "bronchopulmonary dysplasia", "interstitial lung disease",
+    "pulmonary hypertension", "cystic fibrosis", "dementia",
+    "down syndrome", "immunocompromised", "hiv", "obesity",
+    "pregnancy", "sickle cell disease", "thalassemia", "organ transplant",
+    "cerebrovascular disease", "substance use disorder", "tuberculosis",
+    "mental health conditions", "schizophrenia", "bipolar disorder",
+    "severe depression", "parkinsons disease", "cerebral palsy",
+    "multiple sclerosis", "motor neurone disease", "spinal muscular atrophy",
+    "alpha-1 antitrypsin deficiency", "pulmonary fibrosis"
 ];
 
 // Transcribe Audio
@@ -72,8 +86,10 @@ app.post("/api/analyze", async (req, res) => {
         // Fetch adverse event reports from FDA API
         let fdaReports = [];
         try {
-            const fdaResponse = await axios.get("https://api.fda.gov/drug/event.json?limit=5");
-            fdaReports = fdaResponse.data.results.flatMap(report => ({
+            const fdaResponse = await axios.get("https://api.fda.gov/drug/event.json?limit=10");
+            fdaReports = fdaResponse.data.results.map(report => ({
+                safetyreportid: report.safetyreportid,
+                serious: report.serious,
                 drug: report.patient?.drug?.[0]?.medicinalproduct?.toLowerCase() || "Unknown",
                 reactions: report.patient?.reaction?.map(r => r.reactionmeddrapt.toLowerCase()) || []
             }));
@@ -81,27 +97,62 @@ app.post("/api/analyze", async (req, res) => {
             console.error("⚠️ FDA API Error:", error.message);
         }
 
+        //fuzzy string match config
+        const fuseOptions = {
+            keys: ['text'],
+            threshold: 0.2
+        };
+
         // Find matches
-        const matchedEvents = extractedEntities.filter(entity =>
-            fdaReports.some(fda => fda.reactions.includes(entity.text))
-        );
+        const matchedEvents = [];
+
+        for (const entity of extractedEntities) {
+            for (const report of fdaReports) {
+                const fuse = new Fuse(report.reactions, fuseOptions);
+                const results = fuse.search(entity.text);
+
+                if (results.length > 0) {
+                    matchedEvents.push({
+                        symptom: entity.text,
+                        category: entity.category,
+                        drug: report.drug,
+                        safetyreportid: report.safetyreportid,
+                        serious: report.serious,
+                        reaction: results[0].item
+                    });
+                }
+            }
+        }
 
         // Risk Calculation
-        let riskScore = matchedEvents.length * 20;
-        if (extractedEntities.some(symptom => HIGH_RISK_CONDITIONS.includes(symptom.text))) riskScore += 30;
-        riskScore = Math.min(riskScore, 100); // ✅ FIXED: Ensure max risk score is 100
+        const highRiskConditions = extractedEntities.filter(entity =>
+            HIGH_RISK_CONDITIONS.includes(entity.text)
+        );
 
-        const riskLevel = riskScore >= 70 ? "High" : riskScore >= 40 ? "Moderate" : "Low";
+        let riskScore;
+        if (highRiskConditions.length === 0) {
+            riskScore = 0;
+        } else if (highRiskConditions.length === 1) {
+            riskScore = 30;
+        } else if (highRiskConditions.length === 2) {
+            riskScore = 60;
+        } else if (highRiskConditions.length === 3) {
+            riskScore = 70;
+        } else if (highRiskConditions.length === 4) {
+            riskScore = 80;
+        } else {
+            riskScore = 100;
+        }
+
+        const riskLevel = riskScore >= 80 ? "High" : riskScore >= 60 ? "Moderate" : riskScore >= 30 ? "Low" : "Minimal";
 
         res.json({
             patientName,
             extractedEntities,
             riskScore,
             riskLevel,
-            fdaMatches: matchedEvents.map(event => ({
-                symptom: event.text,
-                category: event.category
-            }))
+            highRiskConditions: highRiskConditions.map(condition => condition.text),
+            fdaMatches: matchedEvents
         });
     } catch (error) {
         console.error("🔥 Error:", error);
@@ -110,4 +161,4 @@ app.post("/api/analyze", async (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`))
