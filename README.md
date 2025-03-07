@@ -1,4 +1,4 @@
-MediAlert
+# MediAlert
 
 Welcome to our project repository for the **Veersa Hackathon 2025**! We are tackling two critical use cases in the healthcare industry:
 
