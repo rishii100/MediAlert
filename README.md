@@ -1,26 +1,5 @@
 # MediAlert
 
-Welcome to our project repository for the **Veersa Hackathon 2025**! We are tackling two critical use cases in the healthcare industry:
-
-1. **Use Case 1: Adverse Medical Event Prediction from a Phone Call**
-2. **Use Case 3: Mobile Application for Scheduling Appointments**
-
-Our goal is to provide a seamless experience for both **patients** and **doctors** by leveraging modern technologies to solve real-world healthcare challenges.
-
-## Submission Details
-
-### Hosted Links
-- **Doctor Dashboard:** [Vercel Deployment](https://adverse-event-detection-host.vercel.app)
-
-- **Patient Mobile App Figma Design:** [Figma Design](https://www.figma.com/proto/TdOuVyQ9TKeTL9KBBCp7wb/WebDesign?node-id=11-343&t=1t2yUjlGP499ruZ8-1&starting-point-node-id=11%3A343)
-- **Video Presentation:** [Youtube Video](https://youtu.be/0UjOlSE_QZE)
-
-- **PPT Presentation:**[PPT](https://www.canva.com/design/DAGg4PA13Co/e9WQj54sNsCEZxQv55gHaw/view?utm_content=DAGg4PA13Co&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbade13b4a0)
-  
-### Test Cases
-- **Adverse Event Detection Test Cases:** `Adverse Event Detection Test Document.md`
-- **Doctor Appointment Test Cases:** `Doctor-Appointment Test Documentation.md`
-
 ## Overview
 This project integrates two innovative healthcare solutions into one platform:
 1. **Adverse Medical Event Prediction from Phone Calls:** Leverages AI and NLP to analyze patient-doctor conversations, detect early signs of potential adverse events, and generate actionable risk reports for healthcare providers.
@@ -72,6 +51,18 @@ By combining these functionalities, our platform improves patient safety through
 - **Authentication:** Firebase Authentication
 - **Notifications:** Firebase Cloud Messaging, Nodemailer
 - **Deployment:** Vercel (Web), Render (Backend)
+
+### Hosted Links
+- **Doctor Dashboard:** [Vercel Deployment](https://adverse-event-detection-host.vercel.app)
+
+- **Patient Mobile App Figma Design:** [Figma Design](https://www.figma.com/proto/TdOuVyQ9TKeTL9KBBCp7wb/WebDesign?node-id=11-343&t=1t2yUjlGP499ruZ8-1&starting-point-node-id=11%3A343)
+- **Video Presentation:** [Youtube Video](https://youtu.be/0UjOlSE_QZE)
+
+- **PPT Presentation:**[PPT](https://www.canva.com/design/DAGg4PA13Co/e9WQj54sNsCEZxQv55gHaw/view?utm_content=DAGg4PA13Co&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbade13b4a0)
+  
+### Test Cases
+- **Adverse Event Detection Test Cases:** `Adverse Event Detection Test Document.md`
+- **Doctor Appointment Test Cases:** `Doctor-Appointment Test Documentation.md`
 
 ## Deployment
 - **Frontend:** Deploy on Vercel.
