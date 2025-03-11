@@ -66,7 +66,7 @@ By combining these functionalities, our platform improves patient safety through
 
 ## Deployment
 - **Frontend:** Deploy on Vercel.
-- **Backend:** Deploy on Render or Heroku.
+- **Backend:** Deployed on Render.
 - **Mobile App:** Build APKs/iOS builds using Flutter’s build tools.
 
 
