@@ -58,7 +58,7 @@ By combining these functionalities, our platform improves patient safety through
 - **Patient Mobile App Figma Design:** [Figma Design](https://www.figma.com/proto/TdOuVyQ9TKeTL9KBBCp7wb/WebDesign?node-id=11-343&t=1t2yUjlGP499ruZ8-1&starting-point-node-id=11%3A343)
 - **Video Presentation:** [Youtube Video](https://youtu.be/0UjOlSE_QZE)
 
-- **PPT Presentation:**[PPT](https://www.canva.com/design/DAGg4PA13Co/e9WQj54sNsCEZxQv55gHaw/view?utm_content=DAGg4PA13Co&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbade13b4a0)
+- **PPT Presentation:** [PPT](https://www.canva.com/design/DAGg4PA13Co/e9WQj54sNsCEZxQv55gHaw/view?utm_content=DAGg4PA13Co&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbade13b4a0)
   
 ### Test Cases
 - **Adverse Event Detection Test Cases:** `Adverse Event Detection Test Document.md`
