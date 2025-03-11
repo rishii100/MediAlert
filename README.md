@@ -65,9 +65,9 @@ By combining these functionalities, our platform improves patient safety through
 - **Doctor Appointment Test Cases:** `Doctor-Appointment Test Documentation.md`
 
 ## Deployment
-- **Frontend:** Deploy on Vercel.
+- **Frontend:** Deployed on Vercel.
 - **Backend:** Deployed on Render.
-- **Mobile App:** Build APKs/iOS builds using Flutter’s build tools.
+- **Mobile App:** Built APKs/iOS builds using Flutter’s build tools.
 
 
 ### License
